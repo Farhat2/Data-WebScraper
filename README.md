@@ -13,3 +13,4 @@ The web scraper file includes classes, each class have methods responsible about
 
 *Main : Coordinate the overall process by integrating the sitemap parsing, article scraping, and file saving. Ensure the script processes all monthly sitemaps and organizes output by year and month. Implement error handling to manage network issues and unexpected data formats.
 
+use this link to know more : https://youtu.be/1PIMCbVE6J0
