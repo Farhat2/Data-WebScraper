@@ -26,3 +26,4 @@ in this task we will ad 2 python files to our project , one for data storage , a
 - app.py file : this file we Build a Flask API that exposes endpoints for querying and aggregating the data, and Implement various aggregation endpoints, such as top keywords, top authors, articles by publication date, and articles by word count. Each end point returns what we want , and the way of testing is by  running the app.py script The Flask server should start, and you can access the API endpoints by navigating to http://127.0.0.1:5000/ followed by the endpoint path in your web browser or using a tool like Postman , in the video you will see many endpoints how it runs .
 
 use this link to know more : https://youtu.be/yCqUdKKO9kQ
+                             https://youtu.be/062G_6WtpQo
