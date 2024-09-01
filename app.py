@@ -1,10 +1,13 @@
 from datetime import datetime, timedelta
 
-from flask import Flask, jsonify, abort, request, logging
+from flask import Flask, jsonify, abort, request, logging, render_template
 from pymongo import MongoClient
+from flask_cors import CORS
 
 app = Flask(__name__)
 
+# Enable CORS for all routes
+CORS(app)
 
 client = MongoClient("mongodb://localhost:27017/")
 db = client["almayadeen"]
@@ -17,7 +20,7 @@ def top_keywords():
         {"$unwind": "$keywords"},
         {"$group": {"_id": "$keywords", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}},
-        {"$limit": 10}
+        {"$limit": 50}
     ]
 
 
@@ -70,7 +73,8 @@ def top_authors():
 def articles_by_word_count():
     pipeline = [
         {"$group": {"_id": "$word_count", "count": {"$sum": 1}}},
-        {"$sort": {"_id": 1}}  # Sort by word count (ascending)
+        {"$sort": {"_id": 1}} ,
+        {"$limit": 50}# Sort by word count (ascending)
     ]
     result = list(collection.aggregate(pipeline))
     return jsonify(result)
