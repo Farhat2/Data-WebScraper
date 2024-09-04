@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Article Classes Chart</title>
+</head>
+<body>
+<!-- Styles -->
+<style>
+    #chartdiv {
+        width: 100%;
+        height: 500px;
+    }
+</style>
+
+<!-- Resources -->
+<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+
+<!-- Chart code -->
+<script>
+    am5.ready(function() {
+
+        // Fetch data from the API
+        fetch('http://127.0.0.1:5000/articles_by_classes')
+            .then(response => response.json())
+            .then(data => {
+                // Prepare chart data
+                let chartData = data.map(item => ({
+                    year: item._id,  // Class name
+                    count: item.count  // Article count
+                }));
+
+                // Create root element
+                var root = am5.Root.new("chartdiv");
+
+                var myTheme = am5.Theme.new(root);
+
+                myTheme.rule("Grid", ["base"]).setAll({
+                    strokeOpacity: 0.1
+                });
+
+                // Set themes
+                root.setThemes([
+                    am5themes_Animated.new(root),
+                    myTheme
+                ]);
+
+                // Create chart
+                var chart = root.container.children.push(am5xy.XYChart.new(root, {
+                    panX: false,
+                    panY: false,
+                    wheelX: "panY",
+                    wheelY: "zoomY",
+                    paddingLeft: 0,
+                    layout: root.verticalLayout
+                }));
+
+                // Add scrollbar
+                chart.set("scrollbarY", am5.Scrollbar.new(root, {
+                    orientation: "vertical"
+                }));
+
+                // Create axes
+                var yRenderer = am5xy.AxisRendererY.new(root, {});
+                var yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
+                    categoryField: "year",
+                    renderer: yRenderer,
+                    tooltip: am5.Tooltip.new(root, {})
+                }));
+
+                yRenderer.grid.template.setAll({
+                    location: 1
+                });
+
+                yAxis.data.setAll(chartData);
+
+                var xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+                    min: 0,
+                    maxPrecision: 0,
+                    renderer: am5xy.AxisRendererX.new(root, {
+                        minGridDistance: 40,
+                        strokeOpacity: 0.1
+                    })
+                }));
+
+                // Add legend
+                var legend = chart.children.push(am5.Legend.new(root, {
+                    centerX: am5.p50,
+                    x: am5.p50
+                }));
+
+                // Add series
+                function makeSeries(name, fieldName) {
+                    var series = chart.series.push(am5xy.ColumnSeries.new(root, {
+                        name: name,
+                        stacked: true,
+                        xAxis: xAxis,
+                        yAxis: yAxis,
+                        baseAxis: yAxis,
+                        valueXField: fieldName,
+                        categoryYField: "year"
+                    }));
+
+                    series.columns.template.setAll({
+                        tooltipText: "{name}, {categoryY}: {valueX}",
+                        tooltipY: am5.percent(90)
+                    });
+
+                    series.data.setAll(chartData);
+
+                    // Make stuff animate on load
+                    series.appear();
+
+                    series.bullets.push(function () {
+                        return am5.Bullet.new(root, {
+                            sprite: am5.Label.new(root, {
+                                text: "{valueX}",
+                                fill: root.interfaceColors.get("alternativeText"),
+                                centerY: am5.p50,
+                                centerX: am5.p50,
+                                populateText: true
+                            })
+                        });
+                    });
+
+                    legend.data.push(series);
+                }
+
+                makeSeries("Article Count", "count");
+
+                // Make stuff animate on load
+                chart.appear(1000, 100);
+
+            })
+            .catch(error => console.error('Error fetching data from API:', error));
+
+    }); // end am5.ready()
+</script>
+
+<!-- HTML -->
+<div id="chartdiv"></div>
+</body>
+</html>
