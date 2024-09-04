@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Articles by Year</title>
+    <style>
+        #chartdiv {
+            width: 100%;
+            height: 500px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 200px;
+            margin-right: 10px;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Articles by Year</h1>
+
+    <!-- Form for inputting year -->
+    <form id="year-form">
+        <input type="text" id="year" placeholder="Enter Year" required>
+        <input type="submit" value="Fetch Data">
+    </form>
+
+    <!-- Chart Container -->
+    <div id="chartdiv"></div>
+</div>
+
+<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+
+<script>
+am5.ready(function() {
+    // Create root element
+    var root = am5.Root.new("chartdiv");
+
+    // Set themes
+    root.setThemes([
+        am5themes_Animated.new(root)
+    ]);
+
+    // Create chart
+    var chart = root.container.children.push(am5xy.XYChart.new(root, {
+        panX: false,
+        panY: false,
+        wheelX: "panX",
+        wheelY: "zoomX",
+        paddingLeft: 0,
+        layout: root.verticalLayout
+    }));
+
+    // Create axes
+    var yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
+        categoryField: "year",
+        renderer: am5xy.AxisRendererY.new(root, {
+            inversed: true,
+            cellStartLocation: 0.1,
+            cellEndLocation: 0.9,
+            minorGridEnabled: true
+        })
+    }));
+
+    var xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererX.new(root, {
+            strokeOpacity: 0.1,
+            minGridDistance: 50
+        }),
+        min: 0
+    }));
+
+    // Add series
+    function createSeries(field, name) {
+        var series = chart.series.push(am5xy.ColumnSeries.new(root, {
+            name: name,
+            xAxis: xAxis,
+            yAxis: yAxis,
+            valueXField: field,
+            categoryYField: "year",
+            sequencedInterpolation: true,
+            tooltip: am5.Tooltip.new(root, {
+                pointerOrientation: "horizontal",
+                labelText: "[bold]{name}[/]\n{categoryY}: {valueX}"
+            })
+        }));
+
+        series.columns.template.setAll({
+            height: am5.p100,
+            strokeOpacity: 0
+        });
+
+        series.bullets.push(function () {
+            return am5.Bullet.new(root, {
+                locationX: 1,
+                locationY: 0.5,
+                sprite: am5.Label.new(root, {
+                    centerY: am5.p50,
+                    text: "{valueX}",
+                    populateText: true
+                })
+            });
+        });
+
+        series.bullets.push(function () {
+            return am5.Bullet.new(root, {
+                locationX: 1,
+                locationY: 0.5,
+                sprite: am5.Label.new(root, {
+                    centerX: am5.p100,
+                    centerY: am5.p50,
+                    text: "{name}",
+                    fill: am5.color(0xffffff),
+                    populateText: true
+                })
+            });
+        });
+
+        return series;
+    }
+
+    // Fetch data based on user input
+    document.getElementById('year-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const year = document.getElementById('year').value.trim();
+        const apiUrl = `http://127.0.0.1:5000/articles_by_year/${year}`;
+
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                console.log('API Response:', data); // Debugging line
+
+                if (data[year]) {
+                    const articleCount = parseInt(data[year].split(' ')[0]);
+
+                    // Clear previous chart series
+                    chart.series.clear();
+
+                    // Prepare data for the chart
+                    const dataEntries = [{
+                        year: year,
+                        value: articleCount
+                    }];
+
+                    // Create series with new data
+                    createSeries("value", "Articles");
+
+                    // Update chart with new data
+                    chart.data.setAll(dataEntries);
+                    chart.appear();
+                } else {
+                    console.error('No data available for the specified year.');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    });
+});
+</script>
+
+</body>
+</html>

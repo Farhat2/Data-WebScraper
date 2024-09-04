@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pie Chart from API</title>
+  <style>
+    #chartdiv {
+      width: 100%;
+      height: 500px;
+    }
+  </style>
+  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+</head>
+<body>
+  <div id="chartdiv"></div>
+
+  <script>
+    am5.ready(function() {
+      // Create root element
+      var root = am5.Root.new("chartdiv");
+
+      // Set themes
+      root.setThemes([
+        am5themes_Animated.new(root)
+      ]);
+
+      // Create chart
+      var chart = root.container.children.push(
+        am5percent.PieChart.new(root, {
+          endAngle: 270
+        })
+      );
+
+      // Create series
+      var series = chart.series.push(
+        am5percent.PieSeries.new(root, {
+          valueField: "value",
+          categoryField: "category",
+          endAngle: 270
+        })
+      );
+
+      series.states.create("hidden", {
+        endAngle: -90
+      });
+
+      // Fetch data from API
+      fetch('http://127.0.0.1:5000/top_classes')
+        .then(response => response.json())
+        .then(data => {
+          // Parse and format data
+          const formattedData = data.map(item => {
+            const match = item.match(/'value': '([^']*)'/);
+            const value = item.match(/\((\d+) articles\)/)[1];
+            return {
+              category: match ? match[1] : 'Unknown',
+              value: parseInt(value)
+            };
+          });
+
+          // Set data to the series
+          series.data.setAll(formattedData);
+
+          series.appear(1000, 100);
+        })
+        .catch(error => console.error('Error fetching data:', error));
+    });
+  </script>
+</body>
+</html>

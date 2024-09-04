@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Article Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 400px;
+            margin-right: 10px;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+        table td {
+            background-color: #fff;
+        }
+        .keywords {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .keywords li {
+            padding: 4px 0;
+        }
+        .url a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .url a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Article Details</h1>
+
+    <!-- Form for inputting postid -->
+    <form id="postid-form">
+        <input type="text" id="postid" placeholder="Enter Article Post ID" required>
+        <input type="submit" value="Fetch Details">
+    </form>
+
+    <table>
+        <tr>
+            <th>Title</th>
+            <td id="title"></td>
+        </tr>
+        <tr>
+            <th>Keywords</th>
+            <td id="keywords"></td>
+        </tr>
+        <tr>
+            <th>URL</th>
+            <td class="url" id="url"></td>
+        </tr>
+    </table>
+</div>
+
+<script>
+    document.getElementById('postid-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const postid = document.getElementById('postid').value.trim();
+        const apiUrl = `http://127.0.0.1:5000/article_details/${postid}`;
+
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('title').textContent = data.Title.trim();
+                const keywordsList = data.Keywords.map(keyword => `<li>${keyword}</li>`).join('');
+                document.getElementById('keywords').innerHTML = `<ul class="keywords">${keywordsList}</ul>`;
+                document.getElementById('url').innerHTML = `<a href="${data.URL}" target="_blank">${data.URL}</a>`;
+            })
+            .catch(error => console.error('Error fetching article details:', error));
+    });
+</script>
+
+</body>
+</html>
