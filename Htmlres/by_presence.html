@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pie Chart with API Data</title>
+</head>
+<body>
+<!-- Styles -->
+<style>
+#chartdiv {
+  width: 100%;
+  height: 500px;
+}
+</style>
+
+<!-- Resources -->
+<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+
+<!-- Chart code -->
+<script>
+am5.ready(function() {
+  // Create root element
+  var root = am5.Root.new("chartdiv");
+
+  // Set themes
+  root.setThemes([
+    am5themes_Animated.new(root)
+  ]);
+
+  // Create chart
+  var chart = root.container.children.push(am5percent.PieChart.new(root, {
+    layout: root.verticalLayout
+  }));
+
+  // Create series
+  var series = chart.series.push(am5percent.PieSeries.new(root, {
+    valueField: "value",
+    categoryField: "category"
+  }));
+
+  // Fetch data from the API
+  fetch('http://127.0.0.1:5000/articles_with_thumbnail')
+    .then(response => response.json())
+    .then(data => {
+      // Transform API data into the format needed by amCharts
+      let chartData = Object.keys(data).map(key => ({
+        category: key.trim(), // Trim any whitespace or newline characters
+        value: 1  // Set value to 1 since each title represents one occurrence
+      }));
+
+      // Set data to the chart
+      series.data.setAll(chartData);
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+    });
+
+  // Play initial series animation
+  series.appear(1000, 100);
+
+}); // end am5.ready()
+</script>
+
+<!-- HTML -->
+<div id="chartdiv"></div>
+</body>
+</html>

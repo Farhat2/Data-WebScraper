@@ -265,7 +265,9 @@ def articles_with_thumbnail():
     # Find articles that have a non-empty 'thumbnail' field
     pipeline = [
         {"$match": {"thumbnail": {"$exists": True, "$ne": ""}}},
-        {"$project": {"title": 1}}  # Assuming 'title' is the field to return
+        {"$project": {"title": 1}} ,
+        {"$limit":40}# Assuming 'title' is the field to return
+
     ]
 
     results = list(collection.aggregate(pipeline))
