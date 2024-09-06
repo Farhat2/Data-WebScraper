@@ -290,6 +290,7 @@ def articles_updated_after_publication():
                 "$gt": ["$last_updated", "$published_time"]
             }
         }},
+        {"$limit":30},
         {"$project": {
             "title": 1,
             "last_updated": 1,

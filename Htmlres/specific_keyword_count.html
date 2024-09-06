@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Articles with Specific Keywords</title>
+</head>
+<body>
+<!-- Styles -->
+<style>
+#chartdiv {
+  width: 100%;
+  height: 500px;
+}
+</style>
+
+<!-- Input for User -->
+<div>
+    <label for="keywordCount">Enter keyword count:</label>
+    <input type="number" id="keywordCount" value="10">
+    <button id="fetchData">Update Chart</button>
+</div>
+
+<!-- Chart container -->
+<div id="chartdiv"></div>
+
+<!-- Resources -->
+<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+
+<script>
+am5.ready(function() {
+
+    // Create root element
+    var root = am5.Root.new("chartdiv");
+
+    // Set themes
+    root.setThemes([
+        am5themes_Animated.new(root)
+    ]);
+
+    // Create chart
+    var chart = root.container.children.push(
+        am5percent.PieChart.new(root, {
+            startAngle: 160, endAngle: 380
+        })
+    );
+
+    // Create series
+    var series0 = chart.series.push(
+        am5percent.PieSeries.new(root, {
+            valueField: "articles",
+            categoryField: "keyword",
+            startAngle: 160,
+            endAngle: 380,
+            radius: am5.percent(70),
+            innerRadius: am5.percent(65)
+        })
+    );
+
+    var colorSet = am5.ColorSet.new(root, {
+        colors: [series0.get("colors").getIndex(0)],
+        passOptions: {
+            lightness: -0.05,
+            hue: 0
+        }
+    });
+
+    series0.set("colors", colorSet);
+    series0.ticks.template.set("forceHidden", true);
+    series0.labels.template.set("forceHidden", true);
+
+    var series1 = chart.series.push(
+        am5percent.PieSeries.new(root, {
+            startAngle: 160,
+            endAngle: 380,
+            valueField: "bottles",
+            innerRadius: am5.percent(80),
+            categoryField: "keyword"
+        })
+    );
+
+    series1.ticks.template.set("forceHidden", true);
+    series1.labels.template.set("forceHidden", true);
+
+    var label = chart.seriesContainer.children.push(
+        am5.Label.new(root, {
+            textAlign: "center",
+            centerY: am5.p100,
+            centerX: am5.p50,
+            text: "[fontSize:18px]total[/]:\n[bold fontSize:30px]0[/]"
+        })
+    );
+
+    // Function to update chart based on user input
+    function updateChart() {
+        var keywordCount = document.getElementById('keywordCount').value;
+        var apiUrl = 'http://127.0.0.1:5000/articles_with_specific_keyword_count/' + keywordCount;
+
+        // Update page title
+        document.title = 'Articles with ' + keywordCount + ' Keywords';
+
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                // Extract the count from the API response
+                var countString = data["Articles with exactly " + keywordCount + " keywords"];
+                var count = parseInt(countString.match(/\d+/)[0]);
+
+                // Update chart data
+                var data = [
+                    { keyword: "Specific Keyword", articles: count, bottles: 0 } // Example data
+                ];
+
+                series0.data.setAll(data);
+                series1.data.setAll(data);
+
+                // Update label with total count
+                label.set("text", "[fontSize:18px]total[/]:\n[bold fontSize:30px]" + count + "[/]");
+
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    }
+
+    // Initial chart update
+    updateChart();
+
+    // Add event listener to button
+    document.getElementById('fetchData').addEventListener('click', updateChart);
+
+}); // end am5.ready()
+</script>
+</body>
+</html>

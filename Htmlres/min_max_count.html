@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Word Count Histogram</title>
+</head>
+<body>
+<!-- Styles -->
+<style>
+#chartdiv {
+  width: 100%;
+  height: 500px;
+}
+</style>
+
+<!-- Input Fields -->
+<div>
+  <label for="minWordCount">Minimum Word Count:</label>
+  <input type="number" id="minWordCount" value="10" min="0">
+  <label for="maxWordCount">Maximum Word Count:</label>
+  <input type="number" id="maxWordCount" value="100" min="0">
+  <button onclick="updateChartFromInput()">Update Chart</button>
+</div>
+
+<!-- Resources -->
+<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+
+<!-- Chart code -->
+<script>
+am5.ready(function() {
+
+  // Create root element
+  var root = am5.Root.new("chartdiv");
+
+  // Set themes
+  root.setThemes([
+    am5themes_Animated.new(root)
+  ]);
+
+  // Create chart
+  var chart = root.container.children.push(am5xy.XYChart.new(root, {
+    wheelX: "none",
+    wheelY: "none"
+  }));
+
+  // Add cursor
+  var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
+  cursor.lineY.set("forceHidden", true);
+
+  // Add scrollbar
+  chart.set("scrollbarX", am5.Scrollbar.new(root, {
+    orientation: "horizontal",
+    exportable: false
+  }));
+
+  // Create axes
+  var xRenderer = am5xy.AxisRendererX.new(root, {
+    minGridDistance: 30
+  });
+
+  var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+    categoryField: "category",
+    renderer: xRenderer
+  }));
+
+  var yRenderer = am5xy.AxisRendererY.new(root, {});
+  yRenderer.labels.template.set("centerX", am5.p50);
+
+  var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+    renderer: yRenderer
+  }));
+
+  // Add series
+  var series = chart.series.push(am5xy.ColumnSeries.new(root, {
+    name: "Series 1",
+    xAxis: xAxis,
+    yAxis: yAxis,
+    valueYField: "value",
+    categoryXField: "category"
+  }));
+
+  series.columns.template.setAll({
+    cornerRadius: 5,
+    tooltipText: "{categoryX}: {valueY}"
+  });
+
+  // Set data
+  function updateChart(minWordCount, maxWordCount) {
+    fetch(`http://127.0.0.1:5000/articles_by_word_count_range/${minWordCount}/${maxWordCount}`)
+      .then(response => response.json())
+      .then(data => {
+        // Extract data for the chart
+        const categories = Object.keys(data);
+        const values = Object.values(data).map(value => parseInt(value.match(/\d+/)[0]));
+
+        const chartData = categories.map((category, index) => ({
+          category: category,
+          value: values[index]
+        }));
+
+        xAxis.data.setAll(chartData);
+        series.data.setAll(chartData);
+      })
+      .catch(error => console.error('Error fetching data:', error));
+  }
+
+  // Update chart based on user input
+  window.updateChartFromInput = function() {
+    var minWordCount = document.getElementById('minWordCount').value;
+    var maxWordCount = document.getElementById('maxWordCount').value;
+    updateChart(minWordCount, maxWordCount);
+  };
+
+  // Make stuff animate on load
+  series.appear(1000);
+  chart.appear(1000, 100);
+
+}); // end am5.ready()
+</script>
+
+<!-- HTML -->
+<div id="chartdiv"></div>
+</body>
+</html>
