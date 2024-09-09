@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Recent Articles</title>
+    <style>
+        body {
+            background-color: babyblue;
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th {
+            background-color: black;
+            color: white;
+            padding: 10px;
+        }
+
+        td {
+            background-color: red;
+            color: black;
+            padding: 10px;
+            text-align: left;
+        }
+
+        tr:nth-child(even) td {
+            background-color: darkred;
+        }
+    </style>
+</head>
+<body>
+
+<table id="articlesTable">
+    <thead>
+        <tr>
+            <th>Article</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Data will be populated here by JavaScript -->
+    </tbody>
+</table>
+
+<script>
+    // Fetch data from the API
+    fetch('http://127.0.0.1:5000/recent_articles')
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.querySelector("#articlesTable tbody");
+
+            // Populate the table rows with data
+            data.forEach(article => {
+                const row = document.createElement("tr");
+                const cell = document.createElement("td");
+                cell.textContent = article;
+                row.appendChild(cell);
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+</script>
+
+</body>
+</html>

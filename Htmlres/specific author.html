@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Article Titles Chart</title>
+</head>
+<body>
+<!-- Styles -->
+<style>
+#chartdiv {
+  width: 100%;
+  height: 500px;
+}
+</style>
+
+<!-- HTML -->
+<div>
+    <label for="authorInput">Enter Author Name:</label>
+    <input type="text" id="authorInput" placeholder="Author Name">
+    <button onclick="updateChart()">Update Chart</button>
+</div>
+
+<div id="chartdiv"></div>
+
+<!-- Resources -->
+<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+
+<!-- Chart code -->
+<script>
+var root, chart, legend, yAxis, xAxis, series;
+
+// Initialize chart
+function initializeChart() {
+    root = am5.Root.new("chartdiv");
+
+    var myTheme = am5.Theme.new(root);
+    myTheme.rule("Grid", ["base"]).setAll({
+        strokeOpacity: 0.1
+    });
+
+    root.setThemes([
+        am5themes_Animated.new(root),
+        myTheme
+    ]);
+
+    chart = root.container.children.push(am5xy.XYChart.new(root, {
+        panX: false,
+        panY: false,
+        wheelX: "panY",
+        wheelY: "zoomY",
+        paddingLeft: 0,
+        layout: root.verticalLayout
+    }));
+
+    chart.set("scrollbarY", am5.Scrollbar.new(root, {
+        orientation: "vertical"
+    }));
+
+    var yRenderer = am5xy.AxisRendererY.new(root, {});
+    yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
+        categoryField: "index",
+        renderer: yRenderer,
+        tooltip: am5.Tooltip.new(root, {})
+    }));
+
+    yRenderer.grid.template.setAll({
+        location: 1
+    });
+
+    xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+        min: 0,
+        maxPrecision: 0,
+        renderer: am5xy.AxisRendererX.new(root, {
+            minGridDistance: 40,
+            strokeOpacity: 0.1
+        })
+    }));
+
+    legend = chart.children.push(am5.Legend.new(root, {
+        centerX: am5.p50,
+        x: am5.p50
+    }));
+}
+
+// Update chart with data from API
+function updateChart() {
+    var authorName = document.getElementById("authorInput").value.trim();
+    if (!authorName) {
+        alert("Please enter an author name.");
+        return;
+    }
+
+    fetch(`http://127.0.0.1:5000/articles_by_author/${encodeURIComponent(authorName)}`)
+        .then(response => response.json())
+        .then(data => {
+            // Process data
+            const articles = data.slice(0, 10).map((item, index) => ({
+                title: item.trim(),
+                index: index + 1
+            }));
+
+            // Update Y-axis data
+            yAxis.data.setAll(articles);
+
+            // Remove previous series if any
+            if (series) {
+                series.dispose();
+            }
+
+            series = chart.series.push(am5xy.ColumnSeries.new(root, {
+                name: "Articles",
+                xAxis: xAxis,
+                yAxis: yAxis,
+                baseAxis: yAxis,
+                valueXField: "index",
+                categoryYField: "index"
+            }));
+
+            series.columns.template.setAll({
+                tooltipText: "{name}, {categoryY}: {valueX}",
+                tooltipY: am5.percent(90)
+            });
+            series.data.setAll(articles);
+
+            series.appear();
+
+            series.bullets.push(function () {
+                return am5.Bullet.new(root, {
+                    sprite: am5.Label.new(root, {
+                        text: "{valueX}",
+                        fill: root.interfaceColors.get("alternativeText"),
+                        centerY: am5.p50,
+                        centerX: am5.p50,
+                        populateText: true
+                    })
+                });
+            });
+
+            legend.data.push(series);
+
+            // Update axis labels to include text
+            yAxis.get("renderer").labels.template.adapters.add("text", function(text, target) {
+                var index = target.dataItem ? target.dataItem.index : -1;
+                if (index >= 0 && index < articles.length) {
+                    var article = articles[index];
+                    return `${text}: ${article.title}`;
+                }
+                return text;
+            });
+
+            chart.appear(1000, 100);
+        })
+        .catch(error => {
+            console.error("Error fetching data:", error);
+            alert("Failed to fetch data. Check the console for details.");
+        });
+}
+
+// Initialize chart on page load
+initializeChart();
+</script>
+</body>
+</html>
