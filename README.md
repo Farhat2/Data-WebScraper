@@ -27,3 +27,10 @@ in this task we will ad 2 python files to our project , one for data storage , a
 
 use this link to know more : https://youtu.be/yCqUdKKO9kQ
                              https://youtu.be/062G_6WtpQo
+
+
+
+Task 3 : Data Visualization using amCharts
+
+in this task we should show each endpoint in a nice and simple way , we use charts each endpoint have its own chart , and each kind of data should use for it a chart , 
+Amchart is a good resource for using many kinds of charts , it provides the js code of it . 
