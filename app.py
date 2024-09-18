@@ -649,6 +649,116 @@ def articles_by_coverage(coverage):
         return jsonify({"message": f"An error occurred: {str(e)}"})
 
 
+@app.route('/articles_by_sentiment/<sentiment>', methods=['GET'])
+def get_articles_by_sentiment(sentiment):
+    if db is None or collection is None:
+        return jsonify({"error": "MongoDB not connected."}), 500
+
+    try:
+        # Query MongoDB for articles with the specified sentiment
+        articles = collection.find({"sentiment": sentiment})
+
+        # Prepare the result as a list of articles
+        result = []
+        for article in articles:
+            result.append({
+                "id": str(article['_id']),
+                "title": article.get('title', 'No Title'),
+                "full_text": article.get('full_text', 'No Content'),
+                "sentiment": article.get('sentiment', 'Unknown'),
+                "sentiment_score": article.get('sentiment_score', 'Unknown')
+            })
+
+        # Return the results in JSON format
+        if len(result) > 0:
+            return jsonify(result), 200
+        else:
+            return jsonify({"message": f"No articles found with sentiment: {sentiment}"}), 404
+
+    except Exception as e:
+        print(f"Error querying articles by sentiment: {e}")
+        return jsonify({"error": "Failed to query articles."}), 500
+
+
+# Endpoint to get the most positive articles (positive sentiment and score closest to 1)
+@app.route('/most_positive_articles', methods=['GET'])
+def most_positive_articles():
+    try:
+        # Query articles with "positive" sentiment and sort by sentiment score descending (closer to 1)
+        positive_articles = collection.find(
+            {"sentiment": "positive"}
+        ).sort("sentiment_score", -1).limit(10)  # Modify limit as needed
+
+        articles_list = []
+        for article in positive_articles:
+            articles_list.append({
+                "title": article.get("title", "No title"),
+                "sentiment": article.get("sentiment", ""),
+                "sentiment_score": article.get("sentiment_score", ""),
+                "content": article.get("full_text", "No content")
+            })
+
+        return jsonify({"most_positive_articles": articles_list})
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+# Endpoint to get the most negative articles (negative sentiment and score closest to 1)
+@app.route('/most_negative_articles', methods=['GET'])
+def most_negative_articles():
+    try:
+        # Query articles with "negative" sentiment and sort by sentiment score descending (closer to 1)
+        negative_articles = collection.find(
+            {"sentiment": "negative"}
+        ).sort("sentiment_score", -1).limit(10)  # Modify limit as needed
+
+        articles_list = []
+        for article in negative_articles:
+            articles_list.append({
+                "title": article.get("title", "No title"),
+                "sentiment": article.get("sentiment", ""),
+                "sentiment_score": article.get("sentiment_score", ""),
+                "content": article.get("full_text", "No content")
+            })
+
+        return jsonify({"most_negative_articles": articles_list})
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
+@app.route('/articles_by_entity/<entity>', methods=['GET'])
+def get_articles_by_entity(entity):
+    if db is None or collection is None:
+        return jsonify({"error": "Database not initialized"}), 500
+
+    try:
+        # Query for articles mentioning the specific entity
+        query = {
+            "$or": [
+                {"entities.per": entity},
+                {"entities.loc": entity},
+                {"entities.org": entity}
+            ]
+        }
+        articles = collection.find(query)
+        articles_list = list(articles)  # Convert cursor to list for easier handling
+
+        # Process articles for response
+        result = []
+        for article in articles_list:
+            # Create response data with only entity and full_text fields
+            article_data = {
+                "entity": entity,
+                "full_text": article.get("full_text", "No Text")
+            }
+            result.append(article_data)
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        print(f"Error fetching articles: {e}")
+        return jsonify({"error": "Failed to fetch articles"}), 500
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
