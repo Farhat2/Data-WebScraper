@@ -19,6 +19,7 @@ except Exception as e:
     print(f"Error connecting to MongoDB: {e}")
     db, collection = None, None
 
+
 # Function to extract named entities using Stanza
 def analyze_entities_stanza(text):
     if nlp is None:
@@ -46,6 +47,7 @@ def analyze_entities_stanza(text):
         print(f"Error analyzing entities: {e}")
         return None
 
+
 # Function to fetch articles, analyze entities, and update MongoDB
 def process_articles_for_entities():
     if db is None or collection is None:
@@ -53,13 +55,15 @@ def process_articles_for_entities():
         return
 
     try:
-        # Count how many articles need entity processing, skipping the first 2900
+        # Query for articles with full_text field
         query = {"full_text": {"$exists": True}}
-        article_count = collection.count_documents(query)  # Count total articles
-        print(f"Number of articles found that need processing: {article_count}")
 
-        # Fetch all articles that need entity processing, skipping the first 2900
-        articles_to_process = collection.find(query).skip(2900).limit(7100)
+        # Count the total number of articles that need entity processing
+        article_count = collection.count_documents(query)
+        print(f"Total number of articles found that need processing: {article_count}")
+
+        # Skip the first 5700 articles and process up to 2300 more (i.e., from 5701 to 8000)
+        articles_to_process = collection.find(query).skip(5700).limit(2300)
 
         updated_count = 0  # Counter to track updated articles
 
@@ -99,6 +103,7 @@ def process_articles_for_entities():
 
     except Exception as e:
         print(f"Error processing articles for entity recognition: {e}")
+
 
 # Example usage: Process all articles in the collection
 process_articles_for_entities()
