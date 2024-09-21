@@ -63,7 +63,7 @@ def process_articles_for_entities():
         print(f"Total number of articles found that need processing: {article_count}")
 
         # Skip the first 5700 articles and process up to 2300 more (i.e., from 5701 to 8000)
-        articles_to_process = collection.find(query).skip(5700).limit(2300)
+        articles_to_process = collection.find(query).skip(8000).limit(2000)
 
         updated_count = 0  # Counter to track updated articles
 
