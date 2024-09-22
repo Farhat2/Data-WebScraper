@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Articles by Entity</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            direction: rtl;
+        }
+        header {
+      background-color: #4CAF50;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 18px;
+    }
+    footer {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+        /* Ensures modal body can handle long text */
+        #modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+            white-space: pre-wrap; /* Ensure text wraps correctly */
+            word-wrap: break-word; /* Break long words */
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Articles by Entity</h1>
+</header>
+
+<div class="container mt-4">
+    <!-- Form to input the entity -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <form id="entityForm">
+                <div class="input-group">
+                    <input type="text" id="entityInput" class="form-control" placeholder="enter entity" required>
+                    <button type="submit" class="btn btn-primary">search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Table to display the articles -->
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>entity</th>
+                        <th>العنوان</th>
+                        <th>عرض النص الكامل</th>
+                    </tr>
+                </thead>
+                <tbody id="articles-table">
+                    <!-- Data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for displaying full text -->
+<div class="modal fade" id="fullTextModal" tabindex="-1" aria-labelledby="fullTextModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="fullTextModalLabel">النص الكامل</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <!-- Full text will be shown here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+    <p>DataWeb@farhat.com</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Fetch articles by entity and display them in the table
+    function fetchArticles(entity) {
+        fetch(`http://127.0.0.1:5000/articles_by_entity/${entity}`)
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('articles-table');
+                tableBody.innerHTML = ''; // Clear existing rows
+                // Limit the results to 100 articles
+                const articles = data.slice(0, 100);
+                articles.forEach(article => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${article.entity}</td>
+                        <td>${article.title}</td>
+                        <td><button class="btn btn-primary" data-fulltext='${article.full_text}' onclick="showFullText(this)">عرض</button></td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error fetching articles:', error));
+    }
+
+    // Show full text in a modal popout
+    function showFullText(button) {
+        const fullText = button.getAttribute('data-fulltext'); // Get full text from button attribute
+        const modalBody = document.getElementById('modal-body');
+        modalBody.innerHTML = fullText; // Use innerHTML to display full text
+        const modal = new bootstrap.Modal(document.getElementById('fullTextModal'));
+        modal.show();
+    }
+
+    // Handle form submission to fetch articles based on user input
+    document.getElementById('entityForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent form from reloading the page
+        const entity = document.getElementById('entityInput').value;
+        fetchArticles(entity);
+    });
+</script>
+
+</body>
+</html>

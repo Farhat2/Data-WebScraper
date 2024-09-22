@@ -745,8 +745,9 @@ def get_articles_by_entity(entity):
         # Process articles for response
         result = []
         for article in articles_list:
-            # Create response data with only entity and full_text fields
+            # Create response data with title, entity, and full_text fields
             article_data = {
+                "title": article.get("title", "No Title"),  # Include title
                 "entity": entity,
                 "full_text": article.get("full_text", "No Text")
             }
