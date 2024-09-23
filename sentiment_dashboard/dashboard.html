@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            position: fixed;
+            top: 70px;
+            left: 0;
+            background-color: #4CAF50;
+            padding-top: 20px;
+        }
+
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+        }
+
+        .sidebar a:hover {
+            background-color: #3e8e41;
+        }
+
+        .sidebar img {
+            display: block;
+            margin: 0 auto;
+            width: 80%;
+            border-radius: 10px;
+        }
+
+        /* Content Styling */
+        .content {
+            margin-left: 260px;
+            padding: 20px;
+            margin-top: 80px;
+        }
+
+        /* Header Styling */
+        .header {
+            background-color: #333;
+            color: white;
+            height: 70px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .header img {
+            height: 50px;
+            margin-right: 20px;
+        }
+
+        .header .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .header .learn-more-btn {
+            background-color: #4CAF50;
+            border: none;
+            padding: 10px 20px;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .header .learn-more-btn:hover {
+            background-color: #3e8e41;
+        }
+
+        .modal-body p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Professional Header -->
+<header class="header">
+    <div class="logo">
+        <img src="mayadeen2.jpg" alt="Logo">
+        <h1>Data Sentiment Dashboard</h1>
+    </div>
+    <button class="learn-more-btn" data-bs-toggle="modal" data-bs-target="#learnMoreModal">Learn More</button>
+</header>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <a href="sentiment_analysis.html" target="contentFrame">Sentiment Analysis</a>
+    <a href="most_positive.html" target="contentFrame">Most Positive Articles</a>
+    <a href="most_negative.html" target="contentFrame">Most Negative Articles</a>
+    <a href="entity.html" target="contentFrame">Articles by Entity</a>
+    <a href="top_category1.html" target="contentFrame">top category</a>
+</div>
+
+<!-- Content -->
+<div class="content">
+    <iframe name="contentFrame" src="sentiment_analysis.html" width="100%" height="800px" frameborder="0"></iframe>
+</div>
+
+<!-- Learn More Modal -->
+<div class="modal fade" id="learnMoreModal" tabindex="-1" aria-labelledby="learnMoreModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="learnMoreModalLabel">About Our Channel</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Welcome to our Sentiment Analysis Channel, where we dive deep into the analysis of sentiments across various articles.
+                Here, you'll discover trends in positive and negative sentiments and insights into how different entities are perceived in the media.</p>
+                <p>Subscribe to our channel for regular updates and deep-dive content on sentiment data, media trends, and more!</p>
+                <!-- Add more details as needed -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
